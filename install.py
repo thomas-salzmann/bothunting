@@ -8,13 +8,13 @@ import sys
 from typing import Union
 
 sys.path += [
-    "./bothunting/",
-    "./bothunting/utils",
+    "./protocol_ai/",
+    "./protocol_ai/utils",
 ]
-from bothunting import definitions
-from bothunting.utils import fileutil
-from bothunting.utils import osutil
-from bothunting.utils import pathutil
+from protocol_ai import definitions
+from protocol_ai.utils import fileutil
+from protocol_ai.utils import osutil
+from protocol_ai.utils import pathutil
 
 
 def gen_vscode_settings(prj_root: pathlib.Path, platform_):
@@ -23,7 +23,7 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
         osutil.mkdir(vscode_dir)
 
     home_dir = definitions.get_home_directory()
-    if platform_ == "linux":
+    if platform_ in ("linux", "mac"):
         virtualenvs_dir = home_dir / ".local" / "share" / "virtualenvs"
         bin_dir = "bin"
     elif platform_ == "windows":
@@ -90,11 +90,11 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
             bashrc_lines.append("\n### Protocol AI definitions")
             bashrc_lines.append("export PATH=" + path_env_var)
             bashrc_lines.append(
-                "export TECHLABS_PRJ_ROOT_5=" + str(prj_root)
+                "export TECHLABS_PRJ_ROOT_10=" + str(prj_root)
             )
             bashrc_lines.append(
                 "export PYTHONPATH="
-                + str(prj_root) 
+                + str(prj_root)
                 + ":" 
                 + osutil.getenv("PYTHONPATH")
             )
@@ -118,7 +118,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         )
 
         print("PATH: " + str(python_user_scripts_dir))
-        print("TECHLABS_PRJ_ROOT_5: " + str(prj_root))
+        print("TECHLABS_PRJ_ROOT_10: " + str(prj_root))
         print("PYTHONPATH: " + str(prj_root))
 
         while True:
@@ -140,7 +140,7 @@ def install_dependencies(prj_root: pathlib.Path, platform_: str):
         )
     elif platform_ in ("linux", "mac"):
         commands = (
-            "python -m pip install pipenv --user",
+            "python3 -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
             "pipenv run pip install tensorflow==2.1.0",
@@ -155,7 +155,7 @@ def run(
 ):
     prj_root = pathutil.str_to_path(prj_root)
 
-    set_environment_variables(prj_root, platform_)
+    # set_environment_variables(prj_root, platform_)
     # install_dependencies(prj_root, platform_)
     gen_vscode_settings(prj_root, platform_)
 
