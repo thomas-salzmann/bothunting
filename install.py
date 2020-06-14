@@ -71,7 +71,7 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
 
 
 def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
-    if platform_ == "linux":
+    if platform_ == ("linux", "mac"):
         # Update ~/.bashrc file.
         home_dir = definitions.get_home_directory()
         path_env_var = osutil.getenv("PATH")
