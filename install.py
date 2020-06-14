@@ -118,7 +118,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         )
 
         print("PATH: " + str(python_user_scripts_dir))
-        print("TECHLABS_PRJ_ROOT_10: " + str(prj_root))
+        print("TECHLABS_PRJ_ROOT_5: " + str(prj_root))
         print("PYTHONPATH: " + str(prj_root))
 
         while True:
