@@ -23,6 +23,6 @@ def sep():
     platform_ = get_platform()
     if platform_ == "windows":
         sep = "\\"
-    elif platform_ in ("linux", "darwin"):
+    elif platform_ in ("linux", "mac"):
         sep = "/"
     return sep
