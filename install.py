@@ -82,12 +82,12 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         bashrc_path = home_dir / ".bashrc"
         bashrc_lines = fileutil.readlines(bashrc_path, rstrip=True)
         first_install = True
-        if "### Protocol AI definitions" in bashrc_lines:
+        if "### Bothunting AI definitions" in bashrc_lines:
             first_install = False
 
         if first_install:
             # Append definition of environment variables to ~/.bashrc
-            bashrc_lines.append("\n### Protocol AI definitions")
+            bashrc_lines.append("\n### Bothunting AI definitions")
             bashrc_lines.append("export PATH=" + path_env_var)
             bashrc_lines.append(
                 "export TECHLABS_PRJ_ROOT_10=" + str(prj_root)
