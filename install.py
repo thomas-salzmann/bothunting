@@ -8,13 +8,13 @@ import sys
 from typing import Union
 
 sys.path += [
-    "./protocol_ai/",
-    "./protocol_ai/utils",
+    "./bothunting/",
+    "./bothunting/utils",
 ]
-from protocol_ai import definitions
-from protocol_ai.utils import fileutil
-from protocol_ai.utils import osutil
-from protocol_ai.utils import pathutil
+from bothunting import definitions
+from bothunting.utils import fileutil
+from bothunting.utils import osutil
+from bothunting.utils import pathutil
 
 
 def gen_vscode_settings(prj_root: pathlib.Path, platform_):
