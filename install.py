@@ -90,7 +90,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
             bashrc_lines.append("\n### Bothunting AI definitions")
             bashrc_lines.append("export PATH=" + path_env_var)
             bashrc_lines.append(
-                "export TECHLABS_PRJ_ROOT_10=" + str(prj_root)
+                "export TECHLABS_PRJ_ROOT_5=" + str(prj_root)
             )
             bashrc_lines.append(
                 "export PYTHONPATH="
