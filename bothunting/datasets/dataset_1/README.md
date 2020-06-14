@@ -1,1 +1,1 @@
-https://trello.com/b/VCYJ6Id7/techlabs-bot-hunting-project-5
+https://data.world/drstevekramer/twitter-bot-detection-for-walkaway-campaign/workspace/file?filename=WalkAway+Twitter+Bot-Cyborg+Analysis+by+Paragon+Science.xlsx
