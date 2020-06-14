@@ -155,8 +155,8 @@ def run(
 ):
     prj_root = pathutil.str_to_path(prj_root)
 
-    # set_environment_variables(prj_root, platform_)
-    # install_dependencies(prj_root, platform_)
+    set_environment_variables(prj_root, platform_)
+    install_dependencies(prj_root, platform_)
     gen_vscode_settings(prj_root, platform_)
 
     return 0
