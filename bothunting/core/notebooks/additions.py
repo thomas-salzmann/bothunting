@@ -12,6 +12,7 @@ def get_tweets_over_time(screen_name):
         counter[datetime.date(year=date.year, month=date.month, day=date.day)] += 1
     return counter
 
+
 def get_all_tweets(screen_name):
     """:returns: list of tweets which are stored as a list ([tweet id, tweet creation date, tweet text]) in the list
     and also writes the data into a csv file"""
@@ -22,7 +23,8 @@ def get_all_tweets(screen_name):
     # save most recent tweets
     alltweets.extend(new_tweets)
     # save the id of the oldest tweet less one
-    oldest = alltweets[-1].id - 1
+    if len(alltweets) > 0:
+        oldest = alltweets[-1].id - 1
     # keep grabbing tweets until there are no tweets left to grab
     while len(new_tweets) > 0:
         print(f"getting tweets before {oldest}")
@@ -72,3 +74,19 @@ def get_time_of_existance(screen_name):
     if c is not None:
         return (datetime.datetime.now() - c).days
     return None
+
+
+def get_inactive_days(screen_name):
+    """:returns: number of days since the account's creation on which was not tweeted"""
+    return len([d for d in get_tweets_over_time(screen_name).values() if d == 0])
+
+
+def get_average(screen_name, mode="all"):
+    """:returns: average tweets per day (mode=all) or per day with tweet output (mode=active)"""
+    counter = get_tweets_over_time(screen_name)
+    if mode == "all":
+        return sum(counter.values()) / len(counter)
+    elif mode == "active":
+        return sum(counter.values()) / len([v for v in counter.values() if v > 0])
+    else:
+        return None
