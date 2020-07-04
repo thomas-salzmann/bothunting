@@ -1,18 +1,3 @@
-def get_tweets_over_time(screen_name):
-    """:returns: dictionary with all days as dates since the account's creation as keys and the amount of tweets tweeted
-    on that day as values"""
-    counter = {}
-    creation_date = get_account_creation_date(screen_name)
-    creation_date = datetime.date(year=creation_date.year, month=creation_date.month, day=creation_date.day)
-    today = datetime.date.today()
-    for i in range(0, (today - creation_date).days + 1):
-        counter[creation_date + datetime.timedelta(days=i)] = 0
-    for tweet in get_all_tweets(screen_name):
-        date = tweet[1]
-        counter[datetime.date(year=date.year, month=date.month, day=date.day)] += 1
-    return counter
-
-
 def get_all_tweets(screen_name):
     """:returns: list of tweets which are stored as a list ([tweet id, tweet creation date, tweet text]) in the list
     and also writes the data into a csv file"""
@@ -74,6 +59,21 @@ def get_time_of_existance(screen_name):
     if c is not None:
         return (datetime.datetime.now() - c).days
     return None
+
+
+def get_tweets_over_time(screen_name):
+    """:returns: dictionary with all days as dates since the account's creation as keys and the amount of tweets tweeted
+    on that day as values"""
+    counter = {}
+    creation_date = get_account_creation_date(screen_name)
+    creation_date = datetime.date(year=creation_date.year, month=creation_date.month, day=creation_date.day)
+    today = datetime.date.today()
+    for i in range(0, (today - creation_date).days + 1):
+        counter[creation_date + datetime.timedelta(days=i)] = 0
+    for tweet in get_all_tweets(screen_name):
+        date = tweet[1]
+        counter[datetime.date(year=date.year, month=date.month, day=date.day)] += 1
+    return counter
 
 
 def get_inactive_days(screen_name):
