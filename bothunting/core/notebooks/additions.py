@@ -141,8 +141,9 @@ def is_verified(account_object):
     return account_object.verified
 
 
-def expand_dataset(csv_file, api):
+def expand_columns(csv_file, api):
     df = pd.read_csv(csv_file)
+    # I use the third element of the tuples to distinguish between the different parameters
     functions = [(get_time_of_existence, "time_of_existence", 0), (get_average, "average_daily_tweets", 1),
                  (get_inactive_days, "inactive_days", 1), (has_default_image, "has_default_image", 0),
                  (bio_is_empty, "bio_is_empty", 0), (friends_followers_ratio, "friends_followers_ratio", 0),
@@ -152,7 +153,6 @@ def expand_dataset(csv_file, api):
     for user_id in df["id"]:
         accounts.append(get_user(user_id, api))
         tweets.append(get_all_tweets(user_id, api))
-    print(df.info(), len(accounts), len(tweets))
     for f in functions:
         res = []
         for i in range(len(accounts)):
@@ -165,3 +165,32 @@ def expand_dataset(csv_file, api):
                     res.append(f[0](tweet_list=tweets[i], account_object=accounts[i]))
         df[f[1]] = res
         df.to_csv(csv_file, index=False)
+
+
+def compute_row(df, user_id, api):
+    acc = get_user(user_id=user_id, api=api)
+    twl = get_all_tweets(user_id=user_id, api=api)
+    # I use the third element of the tuples to distinguish between the different parameters
+    functions = [(get_time_of_existence, "time_of_existence", 0), (get_average, "average_daily_tweets", 1),
+                 (get_inactive_days, "inactive_days", 1), (has_default_image, "has_default_image", 0),
+                 (bio_is_empty, "bio_is_empty", 0), (friends_followers_ratio, "friends_followers_ratio", 0),
+                 (is_verified, "is_verified", 0)]
+    for f in functions:
+        if f[1] not in df.columns:
+            df[f[1]] = None
+        if acc is None:
+            df.at[user_id, f[1]] = None
+        else:
+            if f[2] == 0:
+                df.at[user_id, f[1]] = f[0](account_object=acc)
+            elif f[2] == 1:
+                df.at[user_id, f[1]] = f[0](tweet_list=twl, account_object=acc)
+    return df
+
+
+def expand_rows(csv_file, api):
+    df = pd.read_csv(csv_file, index_col=0)
+    for user_id in list(df.index.values):
+        print(user_id)
+        df = compute_row(df, user_id, api)
+        df.to_csv(csv_file)
