@@ -1,3 +1,4 @@
+
 def get_user(user_id, api):
     """:returns: None if the account does not exist or else the account data"""
     try:
@@ -9,29 +10,19 @@ def get_user(user_id, api):
 
 def get_all_tweets(user_id, api):
     """:returns: list of all tweets of the passed user"""
-    # initialize a list to hold all the tweepy Tweets
     all_tweets = []
-    # make initial request for most recent tweets (200 is the maximum allowed count)
     try:
         new_tweets = api.user_timeline(id=user_id, count=200)
-        # save most recent tweets
         all_tweets.extend(new_tweets)
-        # save the id of the oldest tweet less one if there are tweets
         if len(all_tweets) > 0:
             oldest = all_tweets[-1].id - 1
-            # keep grabbing tweets until there are no tweets left to grab
             while len(new_tweets) > 0:
-                print(f"getting tweets before {oldest}")
-                # all subsequent requests use the max_id param to prevent duplicates
                 new_tweets = api.user_timeline(id=user_id, count=200,
-                                               max_id=oldest)
-                # save most recent tweets
+                                               max_id=oldest)  # , tweet_mode='extended'
                 all_tweets.extend(new_tweets)
-                # update the id of the oldest tweet less one
                 oldest = all_tweets[-1].id - 1
-                print(f"...{len(all_tweets)} tweets downloaded so far")
         return all_tweets
-    except:
+    except TweepError:
         return None
     pass
 
@@ -73,7 +64,7 @@ def get_tweet_distribution(tweet_list, account_object=None):
         return None
     counter = {}
     if account_object is None:
-        first_date = tweet_list[0].date
+        first_date = tweet_list[0].created_at
     else:
         first_date = get_account_creation_datetime(account_object)
     first_date = datetime.date(year=first_date.year, month=first_date.month, day=first_date.day)
@@ -135,6 +126,14 @@ def friends_followers_ratio(account_object):
         return None
 
 
+def is_protected(account_object):
+    if account_object is None:
+        return None
+    if account_object.protected:
+        return True
+    return False
+
+
 def is_verified(account_object):
     if account_object is None:
         return None
@@ -143,7 +142,6 @@ def is_verified(account_object):
 
 def expand_columns(csv_file, api):
     df = pd.read_csv(csv_file)
-    # I use the third element of the tuples to distinguish between the different parameters
     functions = [(get_time_of_existence, "time_of_existence", 0), (get_average, "average_daily_tweets", 1),
                  (get_inactive_days, "inactive_days", 1), (has_default_image, "has_default_image", 0),
                  (bio_is_empty, "bio_is_empty", 0), (friends_followers_ratio, "friends_followers_ratio", 0),
@@ -168,29 +166,57 @@ def expand_columns(csv_file, api):
 
 
 def compute_row(df, user_id, api):
-    acc = get_user(user_id=user_id, api=api)
-    twl = get_all_tweets(user_id=user_id, api=api)
-    # I use the third element of the tuples to distinguish between the different parameters
-    functions = [(get_time_of_existence, "time_of_existence", 0), (get_average, "average_daily_tweets", 1),
-                 (get_inactive_days, "inactive_days", 1), (has_default_image, "has_default_image", 0),
-                 (bio_is_empty, "bio_is_empty", 0), (friends_followers_ratio, "friends_followers_ratio", 0),
-                 (is_verified, "is_verified", 0)]
+    print("--", user_id, "--")
+    changed = False
+    acc = None
+    twl = None
+    functions = [(is_protected, "is_protected", 0), (get_time_of_existence, "time_of_existence", 0),
+                 (get_average, "average_daily_tweets", 1), (get_inactive_days, "inactive_days", 1),
+                 (has_default_image, "has_default_image", 0), (bio_is_empty, "bio_is_empty", 0),
+                 (friends_followers_ratio, "friends_followers_ratio", 0), (is_verified, "is_verified", 0)]
     for f in functions:
-        if f[1] not in df.columns:
-            df[f[1]] = None
-        if acc is None:
-            df.at[user_id, f[1]] = None
-        else:
+        if pd.isnull(df[f[1]][user_id]):
+            if acc is None:
+                acc = get_user(user_id=user_id, api=api)
+                if acc is None:
+                    break
+            temp = df[f[1]][user_id]
             if f[2] == 0:
                 df.at[user_id, f[1]] = f[0](account_object=acc)
-            elif f[2] == 1:
+            elif f[2] == 1 and not df["is_protected"][user_id]:
+                if twl is None:
+                    twl = get_all_tweets(user_id=user_id, api=api)
+                    if twl is None:
+                        continue
                 df.at[user_id, f[1]] = f[0](tweet_list=twl, account_object=acc)
-    return df
+            print(user_id, "-", f[1] + ":", temp, "->", df[f[1]][user_id])
+            if temp != df[f[1]][user_id] and pd.notnull(df[f[1]][user_id]):
+                changed = True
+    return df, changed
 
 
 def expand_rows(csv_file, api):
     df = pd.read_csv(csv_file, index_col=0)
+    wrong_rows = []
+    for column_name in ["is_protected", "time_of_existence", "average_daily_tweets", "inactive_days", "has_default_image",
+                        "bio_is_empty", "friends_followers_ratio", "is_verified"]:
+        if column_name not in df.columns:
+            df[column_name] = None
+    print(1, "-", len(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index),
+          "rows wrong")
+    wrong_rows.append(len(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index))
     for user_id in list(df.index.values):
-        print(user_id)
-        df = compute_row(df, user_id, api)
-        df.to_csv(csv_file)
+        (df, changed) = compute_row(df, int(user_id), api)
+        if changed:
+            df.to_csv(csv_file)
+    i = 2
+    while len(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index) > 0:
+        print(i, "-", len(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index),
+              "rows wrong")
+        wrong_rows.append(len(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index))
+        for user_id in list(df.loc[df['time_of_existence'].notnull() & df['average_daily_tweets'].isnull() & (df["is_protected"] != True)].index.values):
+            (df, changed) = compute_row(df, int(user_id), api)
+            if changed:
+                df.to_csv(csv_file)
+        i += 1
+    print(wrong_rows)
