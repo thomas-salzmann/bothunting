@@ -1,4 +1,3 @@
-
 def get_user(user_id, api):
     """:returns: None if the account does not exist or else the account data"""
     try:
