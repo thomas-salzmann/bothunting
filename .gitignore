@@ -4,3 +4,6 @@ __pycache__/
 
 # VS Code settings
 .vscode
+
+# Ipython Checkpoint
+.ipynb_checkpoints
