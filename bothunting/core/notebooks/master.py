@@ -1,7 +1,33 @@
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_moons, make_circles, make_classification
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from tweepy import TweepError
+import tweepy
 import datetime
 import csv
+from sklearn.ensemble import RandomForestClassifier
+
+
+classifier = None
+
+
+def api_setup(consumer_key, consumer_secret, access_token, access_token_secret):
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    return tweepy.API(auth, wait_on_rate_limit=True)
 
 
 def get_user(user_id, api):
@@ -161,8 +187,7 @@ def compute_row(df, user_id, api):
     functions = [(is_protected, "is_protected", 0), (get_time_of_existence, "time_of_existence", 0),
                  (get_average, "average_daily_tweets", 1), (get_inactive_days, "inactive_days", 1),
                  (has_default_image, "has_default_image", 0), (bio_is_empty, "bio_is_empty", 0),
-                 (friends_followers_ratio, "friends_followers_ratio", 0), (is_verified, "is_verified", 0),
-                 (geo_is_enabled, "geo_is_enabled", 0)]
+                 (friends_followers_ratio, "friends_followers_ratio", 0), (is_verified, "is_verified", 0)]  # TODO: ,(geo_is_enabled, "geo_is_enabled", 0)
     for f in functions:
         if pd.isnull(df[f[1]][user_id]):
             if acc is None:
@@ -189,7 +214,7 @@ def expand_rows(csv_file, api):
     wrong_rows = []
     # add the columns to the dataframe
     for column_name in ["is_protected", "time_of_existence", "average_daily_tweets", "inactive_days", "has_default_image",
-                        "bio_is_empty", "friends_followers_ratio", "is_verified", "geo_is_enabled"]:
+                        "bio_is_empty", "friends_followers_ratio", "is_verified"]:  # TODO: , "geo_is_enabled"
         if column_name not in df.columns:
             df[column_name] = None
     # print and save the amount of rows with a time_of_existence value but no average_daily_tweets value
@@ -213,3 +238,59 @@ def expand_rows(csv_file, api):
                 df.to_csv(csv_file)
         i += 1
     print(wrong_rows)
+
+
+def filter_columns(df: pd.DataFrame):
+    df = df.copy()
+    header = list(df.columns)
+    idx = header.index("is_protected")
+    new_header = ["id"] + header[idx:]
+    print(f"header={header}")
+    print(f"new_header={new_header}")
+    return df[new_header]
+
+
+def filter_removed_accounts(df: pd.DataFrame):
+    df = df.copy()
+    return df[~pd.isnull(df["time_of_existence"])]
+
+
+def predict(classifier, target):
+    return classifier.predict(target)
+
+
+def setup_classifier():
+    df = pd.read_csv("complete_data.csv")
+    df = filter_removed_accounts(filter_columns(df)).dropna()
+    # df = df.loc[df["is_protected"].isnull()]
+    # X_header = ["is_protected", "time_of_existence", "average_daily_tweets", "inactive_days", "has_default_image",
+    #           "bio_is_empty", "friends_followers_ratio", "is_verified"]
+    X_header = list(df.columns)[1:-1]
+    account_id, X, y = df["id"], df[X_header], df["result"]
+    X = StandardScaler().fit_transform(X)
+    df[X_header].to_csv("test.csv")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25, random_state=42)
+    RFC = RandomForestClassifier()
+    return RFC.fit(X_train, y_train)
+
+
+def pipeline(screen_name, api):
+    global classifier
+    if classifier is None:
+        classifier = setup_classifier()
+    acc = api.get_user(screen_name=screen_name)
+    user_id = acc.id
+    columns = ["is_protected", "time_of_existence", "average_daily_tweets", "inactive_days", "has_default_image",
+               "bio_is_empty", "friends_followers_ratio", "is_verified"]
+    d = {"id": user_id}
+    for c in columns:
+        d[c] = [None]
+    df, changed = compute_row(pd.DataFrame(data=d, index=[user_id]), user_id, api)
+    df = df[columns]
+    if df["is_protected"][user_id] or df["is_verified"][user_id]:
+        return [0]
+    return predict(classifier, df)
+
+
+api = api_setup("lRMOzCYlR2gmI3iIJHIu7Lqta", "QHUFUtIKa5BsbqhcNF170wAEzDi333UC71HldPAkQztJM6pGVK", "1266657091642679296-807QxTw2kLgh5B8kxfb7ntLGqX9GIh", "iUyxUAMUpkOtbeceKLxN8GPdR0nhHr3uQJyMJebPnbaV3")
+print(pipeline("DanieleMaraldi", api))
