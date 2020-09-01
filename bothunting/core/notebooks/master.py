@@ -19,6 +19,7 @@ import tweepy
 import datetime
 import csv
 from sklearn.ensemble import RandomForestClassifier
+from bothunting.core.notebooks.login_data import *
 
 
 classifier = None
@@ -291,5 +292,5 @@ def pipeline(screen_name, api):
     return predict(classifier, df)
 
 
-api = api_setup("lRMOzCYlR2gmI3iIJHIu7Lqta", "QHUFUtIKa5BsbqhcNF170wAEzDi333UC71HldPAkQztJM6pGVK", "1266657091642679296-807QxTw2kLgh5B8kxfb7ntLGqX9GIh", "iUyxUAMUpkOtbeceKLxN8GPdR0nhHr3uQJyMJebPnbaV3")
+api = api_setup(consumer_key, consumer_secret, access_token, access_token_secret)
 print(pipeline("DanieleMaraldi", api))
