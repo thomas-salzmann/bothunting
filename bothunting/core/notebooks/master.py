@@ -268,7 +268,6 @@ def setup_classifier():
     X_header = list(df.columns)[1:-1]
     account_id, X, y = df["id"], df[X_header], df["result"]
     X = StandardScaler().fit_transform(X)
-    df[X_header].to_csv("test.csv")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25, random_state=42)
     RFC = RandomForestClassifier()
     return RFC.fit(X_train, y_train)
