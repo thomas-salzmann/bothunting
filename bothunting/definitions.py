@@ -1,3 +1,4 @@
+from multiprocessing import Value
 import pathlib
 import platform
 
@@ -27,7 +28,11 @@ def get_home_directory() -> pathlib.Path:
 
 def sep() -> str:
     platform_ = get_platform()
-    sep = "/"
+    sep = None
     if platform_ == "windows":
         sep = "\\"
+    elif platform in ("linux", "mac"):
+        sep = "/"
+    else:
+        raise ValueError("Unknown platform")
     return sep

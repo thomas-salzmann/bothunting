@@ -23,6 +23,8 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
         osutil.mkdir(vscode_dir)
 
     home_dir = definitions.get_home_directory()
+    virtualenvs_dir = None
+    bin_dir = None
     if platform_ in ("linux", "mac"):
         virtualenvs_dir = home_dir / ".local" / "share" / "virtualenvs"
         bin_dir = "bin"
@@ -32,7 +34,9 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
     _, dirs = pathutil.walk(virtualenvs_dir, depth=1)
     project_dir = None
     for x in dirs:
-        if pathutil.basename(definitions.get_root_python_package()) in pathutil.basename(x):
+        if pathutil.basename(
+            definitions.get_root_python_package()
+        ) in pathutil.basename(x):
             project_dir = x
             break
 
@@ -89,13 +93,11 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
             # Append definition of environment variables to ~/.bashrc
             bashrc_lines.append("\n### Bothunting AI definitions")
             bashrc_lines.append("export PATH=" + path_env_var)
-            bashrc_lines.append(
-                "export TECHLABS_PRJ_ROOT_5=" + str(prj_root)
-            )
+            bashrc_lines.append("export TECHLABS_PRJ_ROOT_5=" + str(prj_root))
             bashrc_lines.append(
                 "export PYTHONPATH="
                 + str(prj_root)
-                + ":" 
+                + ":"
                 + osutil.getenv("PYTHONPATH")
             )
     elif platform_ == "windows":
@@ -113,9 +115,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         )
 
         path_env_var = osutil.getenv("PATH")
-        osutil.setenv(
-            "PATH", str(python_user_scripts_dir) + ";" + path_env_var
-        )
+        osutil.setenv("PATH", str(python_user_scripts_dir) + ";" + path_env_var)
 
         print("PATH: " + str(python_user_scripts_dir))
         print("TECHLABS_PRJ_ROOT_5: " + str(prj_root))
@@ -150,14 +150,22 @@ def install_dependencies(prj_root: pathlib.Path, platform_: str):
         subprocess.run(command.split())
 
 
+def create_out_dir(prj_root: pathlib.Path) -> None:
+    out_dir = prj_root / "out_dir"
+    if not pathutil.is_dir(out_dir):
+        osutil.mkdir(out_dir)
+
+
 def run(
-    prj_root: Union[str, pathlib.Path], platform_: str,
+    prj_root: Union[str, pathlib.Path],
+    platform_: str,
 ):
     prj_root = pathutil.str_to_path(prj_root)
 
     set_environment_variables(prj_root, platform_)
     install_dependencies(prj_root, platform_)
     gen_vscode_settings(prj_root, platform_)
+    create_out_dir(prj_root)
 
     return 0
 
