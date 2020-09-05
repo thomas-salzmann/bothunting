@@ -23,12 +23,10 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
         osutil.mkdir(vscode_dir)
 
     home_dir = definitions.get_home_directory()
-    virtualenvs_dir = None
-    bin_dir = None
     if platform_ in ("linux", "mac"):
         virtualenvs_dir = home_dir / ".local" / "share" / "virtualenvs"
         bin_dir = "bin"
-    elif platform_ == "windows":
+    else:  # windows
         virtualenvs_dir = home_dir / ".virtualenvs"
         bin_dir = "Scripts"
     _, dirs = pathutil.walk(virtualenvs_dir, depth=1)
@@ -100,7 +98,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
                 + ":"
                 + osutil.getenv("PYTHONPATH")
             )
-    elif platform_ == "windows":
+    else:  # windows
         proc = subprocess.Popen(
             "python -m site --user-site".split(), stdout=subprocess.PIPE
         )
@@ -131,16 +129,16 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
 
 
 def install_dependencies(prj_root: pathlib.Path, platform_: str):
-    if platform_ == "windows":
+    if platform_ in ("linux", "mac"):
         commands = (
-            "python -m pip install pipenv --user",
+            "python3 -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
             "pipenv run pip install tensorflow==2.1.0",
         )
-    elif platform_ in ("linux", "mac"):
+    else:  # windows
         commands = (
-            "python3 -m pip install pipenv --user",
+            "python -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
             "pipenv run pip install tensorflow==2.1.0",
@@ -173,6 +171,8 @@ def run(
 def main():
     prj_root = definitions.get_prj_root()
     platform_ = definitions.get_platform()
+    if platform_ not in ("linux", "mac", "windows"):
+        raise ValueError(f"Support for platform {platform_} not implemented.")
     exit_code = run(prj_root, platform_)
     return exit_code
 
