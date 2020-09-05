@@ -7,3 +7,5 @@ __pycache__/
 
 # Ipython Checkpoint
 .ipynb_checkpoints
+
+Pipfile.lock
