@@ -8,14 +8,15 @@ pylint = "*"
 rope = "*"
 
 [packages]
+ipython="*"
+jupyter="*"
 matplotlib="*"
 numpy="*"
 pandas="*"
 seaborn="*"
 sklearn="*"
 termcolor="*"
-jupyter="*"
-ipython="*"
+tweepy="*"
 
 
 [requires]
