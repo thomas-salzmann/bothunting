@@ -406,19 +406,8 @@ def setup_classifier(
     df = pd.read_csv(here / "complete_data.csv")
     df = filter_removed_accounts(filter_columns(df)).dropna()
     # df = df.loc[df["is_protected"].isnull()]
-    X_header = [
-        "is_protected",
-        "time_of_existence",
-        "average_daily_tweets",
-        "inactive_days",
-        "has_default_image",
-        "bio_is_empty",
-        "friends_followers_ratio",
-        "is_verified",
-    ]
-    # ! Das Ergebnis df["result"] war teil von 'X'. Somit war die Güte
-    # ! der Vorhersage 100%, weil das Ergebnis selbst ein Prädiktor war.
-    # X_header = list(df.columns)[1:]
+
+    X_header = list(df.columns)[1:-1]
     X, y = df[X_header], df["result"]
     # ? Why does the prediction suddenly work when fit_transform() is
     # ? not applied
@@ -442,11 +431,12 @@ def setup_classifier(
         print(report)
         print(conf_matrix)
 
-        y_pred = classifier.predict(X_train)
-        report = classification_report(y_train, y_pred)
-        conf_matrix = confusion_matrix(y_train, y_pred)
-        print(report)
-        print(conf_matrix)
+        # ! Why does the classification report show perfect results ?
+        # y_pred = classifier.predict(X_train)
+        # report = classification_report(y_train, y_pred)
+        # conf_matrix = confusion_matrix(y_train, y_pred)
+        # print(report)
+        # print(conf_matrix)
 
     return classifier
 
@@ -513,7 +503,14 @@ def classify_account(username: str, api: tweepy.API) -> str:
     return map_[class_]
 
 
+def _create_out_dir() -> None:
+    out_dir = definitions.get_prj_root() / "out"
+    if not pathutil.is_dir(out_dir):
+        osutil.mkdir(out_dir)
+
+
 def main() -> int:
+    _create_out_dir()
     consumer_key = "2dqM1oxHL6ybNsSfMgdwGf2iO"
     consumer_secret = "sYKbwIC24d9RKtZW5CXaxK8t8Q5fMvG1hkkYtV4At9egh9Fdd4"
     access_token = "1898213802-g9kTPGb720zaVjHeA73APcn8NwsDrPjCnh9qbf6"
