@@ -84,17 +84,13 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         bashrc_path = home_dir / ".bashrc"
         bashrc_lines = fileutil.readlines(bashrc_path, rstrip=True)
         first_install = True
-        if "### FOM - Big Data & Data Science definitions" in bashrc_lines:
+        if "### Bothunting definitions" in bashrc_lines:
             first_install = False
 
         if first_install:
             # Append definition of environment variables to ~/.bashrc
-            bashrc_lines.append(
-                "\n### FOM - Big Data & Data Science | Definitions"
-            )
-            bashrc_lines.append(
-                "export FOM_BIG_DATA_DATA_SCIENCE_PRJ_ROOT=" + str(prj_root)
-            )
+            bashrc_lines.append("\n### Bothunting definitions")
+            bashrc_lines.append("export BOTHUNTING_PRJ_ROOT=" + str(prj_root))
             bashrc_lines.append(
                 "export PYTHONPATH=$PYTHONPATH"
                 + ":"
@@ -119,7 +115,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         osutil.setenv("PATH", str(python_user_scripts_dir) + ";" + path_env_var)
 
         print("PATH: " + str(python_user_scripts_dir))
-        print("FOM_BIG_DATA_DATA_SCIENCE_PRJ_ROOT: " + str(prj_root))
+        print("BOTHUNTING_PRJ_ROOT: " + str(prj_root))
         print("PYTHONPATH: " + str(prj_root))
 
         while True:
@@ -158,8 +154,8 @@ def run(
     prj_root = pathutil.str_to_path(prj_root)
 
     set_environment_variables(prj_root, platform_)
-    # install_dependencies(prj_root, platform_)
-    # gen_vscode_settings(prj_root, platform_)
+    install_dependencies(prj_root, platform_)
+    gen_vscode_settings(prj_root, platform_)
 
     return 0
 

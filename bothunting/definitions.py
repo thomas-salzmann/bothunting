@@ -31,7 +31,7 @@ def sep() -> str:
     sep = None
     if platform_ == "windows":
         sep = "\\"
-    elif platform in ("linux", "mac"):
+    elif platform_ in ("linux", "mac"):
         sep = "/"
     else:
         raise ValueError("Unknown platform")
