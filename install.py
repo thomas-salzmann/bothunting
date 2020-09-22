@@ -26,7 +26,7 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
     if platform_ in ("linux", "mac"):
         virtualenvs_dir = home_dir / ".local" / "share" / "virtualenvs"
         bin_dir = "bin"
-    else:  # windows
+    elif platform_ == "windows":
         virtualenvs_dir = home_dir / ".virtualenvs"
         bin_dir = "Scripts"
     _, dirs = pathutil.walk(virtualenvs_dir, depth=1)
@@ -73,32 +73,35 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
 
 
 def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
-    if platform_ == ("linux", "mac"):
+    if platform_ == "linux":
         # Update ~/.bashrc file.
         home_dir = definitions.get_home_directory()
-        path_env_var = osutil.getenv("PATH")
         osutil.setenv(
-            "PATH", str(home_dir / ".local" / "bin") + ":" + path_env_var
+            "PATH",
+            str(home_dir / ".local" / "bin") + ":" + osutil.getenv("PATH"),
         )
 
         bashrc_path = home_dir / ".bashrc"
         bashrc_lines = fileutil.readlines(bashrc_path, rstrip=True)
         first_install = True
-        if "### Bothunting AI definitions" in bashrc_lines:
+        if "### FOM - Big Data & Data Science definitions" in bashrc_lines:
             first_install = False
 
         if first_install:
             # Append definition of environment variables to ~/.bashrc
-            bashrc_lines.append("\n### Bothunting AI definitions")
-            bashrc_lines.append("export PATH=" + path_env_var)
-            bashrc_lines.append("export TECHLABS_PRJ_ROOT_5=" + str(prj_root))
             bashrc_lines.append(
-                "export PYTHONPATH="
-                + str(prj_root)
-                + ":"
-                + osutil.getenv("PYTHONPATH")
+                "\n### FOM - Big Data & Data Science | Definitions"
             )
-    else:  # windows
+            bashrc_lines.append(
+                "export FOM_BIG_DATA_DATA_SCIENCE_PRJ_ROOT=" + str(prj_root)
+            )
+            bashrc_lines.append(
+                "export PYTHONPATH=$PYTHONPATH"
+                + ":"
+                + str(prj_root / "bothunting")
+            )
+        fileutil.writelines(bashrc_path, bashrc_lines, append_newlines=True)
+    elif platform_ == "windows":
         proc = subprocess.Popen(
             "python -m site --user-site".split(), stdout=subprocess.PIPE
         )
@@ -116,7 +119,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         osutil.setenv("PATH", str(python_user_scripts_dir) + ";" + path_env_var)
 
         print("PATH: " + str(python_user_scripts_dir))
-        print("TECHLABS_PRJ_ROOT_5: " + str(prj_root))
+        print("FOM_BIG_DATA_DATA_SCIENCE_PRJ_ROOT: " + str(prj_root))
         print("PYTHONPATH: " + str(prj_root))
 
         while True:
@@ -129,16 +132,16 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
 
 
 def install_dependencies(prj_root: pathlib.Path, platform_: str):
-    if platform_ in ("linux", "mac"):
+    if platform_ == "windows":
         commands = (
-            "python3 -m pip install pipenv --user",
+            "python -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
             "pipenv run pip install tensorflow==2.1.0",
         )
-    else:  # windows
+    elif platform_ in ("linux", "mac"):
         commands = (
-            "python -m pip install pipenv --user",
+            "python3 -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
             "pipenv run pip install tensorflow==2.1.0",
@@ -148,12 +151,6 @@ def install_dependencies(prj_root: pathlib.Path, platform_: str):
         subprocess.run(command.split())
 
 
-def create_out_dir(prj_root: pathlib.Path) -> None:
-    out_dir = prj_root / "out_dir"
-    if not pathutil.is_dir(out_dir):
-        osutil.mkdir(out_dir)
-
-
 def run(
     prj_root: Union[str, pathlib.Path],
     platform_: str,
@@ -161,9 +158,8 @@ def run(
     prj_root = pathutil.str_to_path(prj_root)
 
     set_environment_variables(prj_root, platform_)
-    install_dependencies(prj_root, platform_)
-    gen_vscode_settings(prj_root, platform_)
-    create_out_dir(prj_root)
+    # install_dependencies(prj_root, platform_)
+    # gen_vscode_settings(prj_root, platform_)
 
     return 0
 
@@ -171,8 +167,6 @@ def run(
 def main():
     prj_root = definitions.get_prj_root()
     platform_ = definitions.get_platform()
-    if platform_ not in ("linux", "mac", "windows"):
-        raise ValueError(f"Support for platform {platform_} not implemented.")
     exit_code = run(prj_root, platform_)
     return exit_code
 
