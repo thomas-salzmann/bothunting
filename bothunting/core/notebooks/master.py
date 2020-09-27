@@ -444,10 +444,6 @@ def setup_classifier(
         print(report)
         print(conf_matrix)
 
-        import sys
-
-        sys.exit(0)
-
     return classifier
 
 
