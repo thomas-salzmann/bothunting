@@ -15,7 +15,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from bothunting.core.notebooks.login_data import *
+from bothunting.core.notebooks import constants as const
 
 from bothunting import definitions
 from bothunting.utils import pathutil
@@ -511,12 +511,11 @@ def _create_out_dir() -> None:
 
 def main() -> int:
     _create_out_dir()
-    consumer_key = "2dqM1oxHL6ybNsSfMgdwGf2iO"
-    consumer_secret = "sYKbwIC24d9RKtZW5CXaxK8t8Q5fMvG1hkkYtV4At9egh9Fdd4"
-    access_token = "1898213802-g9kTPGb720zaVjHeA73APcn8NwsDrPjCnh9qbf6"
-    access_token_secret = "8lu2Rmhzmve4GtzVvWNXVM2nZCrzA1g3BTpsIj8HvTUOf"
     api = api_setup(
-        consumer_key, consumer_secret, access_token, access_token_secret
+        const.CONSUMER_KEY,
+        const.CONSUMER_SECRET,
+        const.ACCESS_TOKEN,
+        const.ACCESS_TOKEN_SECRET,
     )
     users = [
         "DanieleMaraldi",
