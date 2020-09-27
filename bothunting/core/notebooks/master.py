@@ -14,6 +14,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from bothunting.core.notebooks import constants as const
 
@@ -388,9 +390,7 @@ def predict(classifier, fts: pd.DataFrame) -> int:
             * 1: Traditional Bot.
             * 2: Social Bot.
     """
-    # ! Applying fit_transforms() makes the feature vector equal to
-    # ! an array of 0, and thus, always gives the result 'Human'.
-    # fts = StandardScaler().fit_transform(fts)
+    fts = StandardScaler().fit_transform(fts)
     return classifier.predict(fts)
 
 
@@ -405,19 +405,25 @@ def setup_classifier(
     global here
     df = pd.read_csv(here / "complete_data.csv")
     df = filter_removed_accounts(filter_columns(df)).dropna()
-    # df = df.loc[df["is_protected"].isnull()]
 
     X_header = list(df.columns)[1:-1]
     X, y = df[X_header], df["result"]
-    # ? Why does the prediction suddenly work when fit_transform() is
-    # ? not applied
-    # X = StandardScaler().fit_transform(X)
+    X = StandardScaler().fit_transform(X)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=42
     )
 
-    RFC = RandomForestClassifier()
-    classifier = RFC.fit(X_train, y_train)
+    # Logistic Regression Algorithm tries to find best linear
+    # separating hyperplane.
+    #
+    # cls_ = LogisticRegression()
+
+    # Classifiers with complete memory of training
+    # data set.
+    #
+    # cls_ = KNeighborsClassifier(n_neighbors=1)
+    cls_ = RandomForestClassifier()
+    classifier = cls_.fit(X_train, y_train)
 
     if debug:
         y_pred = classifier.predict(X_test)
@@ -432,11 +438,15 @@ def setup_classifier(
         print(conf_matrix)
 
         # ! Why does the classification report show perfect results ?
-        # y_pred = classifier.predict(X_train)
-        # report = classification_report(y_train, y_pred)
-        # conf_matrix = confusion_matrix(y_train, y_pred)
-        # print(report)
-        # print(conf_matrix)
+        y_pred = classifier.predict(X_train)
+        report = classification_report(y_train, y_pred)
+        conf_matrix = confusion_matrix(y_train, y_pred)
+        print(report)
+        print(conf_matrix)
+
+        import sys
+
+        sys.exit(0)
 
     return classifier
 
