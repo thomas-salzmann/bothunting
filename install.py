@@ -92,9 +92,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
             bashrc_lines.append("\n### Bothunting definitions")
             bashrc_lines.append("export BOTHUNTING_PRJ_ROOT=" + str(prj_root))
             bashrc_lines.append(
-                "export PYTHONPATH=$PYTHONPATH"
-                + ":"
-                + str(prj_root / "bothunting")
+                "export PYTHONPATH=$PYTHONPATH" + ":" + str(prj_root)
             )
         fileutil.writelines(bashrc_path, bashrc_lines, append_newlines=True)
     elif platform_ == "windows":
