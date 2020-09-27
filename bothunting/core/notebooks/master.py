@@ -517,40 +517,7 @@ def main() -> int:
         const.ACCESS_TOKEN,
         const.ACCESS_TOKEN_SECRET,
     )
-    users = [
-        "DanieleMaraldi",
-        "GianlucaPriopi",
-        "SaverioParnasse",
-        "LauraNannino",
-        "CarloMichettoni",
-        "OriettaBenci",
-        "FrancoLeone99",
-        "DavideOnofi",
-        "StefanoGardelli",
-        "SilviaSenigalli",
-        "SimoneVassala",
-        "MickySavona",
-        "ilovetheadlibs",
-        "IDIGWEBSITES1",
-        "iloveseniorgame",
-        "Iloveseniorrela",
-        "Iloveseniorfitn",
-        "Iloveseniortech",
-        "Rumphdig",
-        "Lilladig",
-        "Buhldig",
-        "Whitforddig",
-        "Featheroffdig",
-        "Converydig",
-        "Waeyaertdig",
-        "Nixiondig",
-        "KBizResources",
-        "fitness0012",
-        "NewToHR",
-        "McGeehan_M",
-        "MomSellsApps",
-    ]
-    for user in users:
+    for user in const.TEST_SET:
         class_ = classify_account(user, api)
         print(f"Class of user '{user}': {class_}.")
     return 0
