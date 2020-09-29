@@ -437,7 +437,6 @@ def setup_classifier(
         print(report)
         print(conf_matrix)
 
-        # ! Why does the classification report show perfect results ?
         y_pred = classifier.predict(X_train)
         report = classification_report(y_train, y_pred)
         conf_matrix = confusion_matrix(y_train, y_pred)
