@@ -14,10 +14,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-from bothunting.core.notebooks import constants as const
+from bothunting.core import constants as const
 
 from bothunting import definitions
 from bothunting.utils import pathutil
