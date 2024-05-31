@@ -2,6 +2,10 @@
 Implements make target 'install'.
 """
 
+from bothunting.utils import pathutil
+from bothunting.utils import osutil
+from bothunting.utils import fileutil
+from bothunting import definitions
 import pathlib
 import subprocess
 import sys
@@ -11,10 +15,6 @@ sys.path += [
     "./bothunting/",
     "./bothunting/utils",
 ]
-from bothunting import definitions
-from bothunting.utils import fileutil
-from bothunting.utils import osutil
-from bothunting.utils import pathutil
 
 
 def gen_vscode_settings(prj_root: pathlib.Path, platform_):
@@ -110,7 +110,8 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
         )
 
         path_env_var = osutil.getenv("PATH")
-        osutil.setenv("PATH", str(python_user_scripts_dir) + ";" + path_env_var)
+        osutil.setenv("PATH", str(python_user_scripts_dir) +
+                      ";" + path_env_var)
 
         print("PATH: " + str(python_user_scripts_dir))
         print("BOTHUNTING_PRJ_ROOT: " + str(prj_root))
@@ -131,14 +132,12 @@ def install_dependencies(prj_root: pathlib.Path, platform_: str):
             "python -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
-            "pipenv run pip install tensorflow==2.1.0",
         )
     elif platform_ in ("linux", "mac"):
         commands = (
             "python3 -m pip install pipenv --user",
             "pipenv install --dev",
             "pipenv run pip install black",
-            "pipenv run pip install tensorflow==2.1.0",
         )
 
     for command in commands:
