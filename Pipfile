@@ -14,10 +14,9 @@ matplotlib="*"
 numpy="*"
 pandas="*"
 seaborn="*"
-sklearn="*"
+scikit-learn="*"
 termcolor="*"
 tweepy="*"
-
 
 [requires]
 python_version = "3.10"
