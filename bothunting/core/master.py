@@ -6,7 +6,6 @@ from typing import Union
 
 import pandas as pd
 import sklearn
-import termcolor
 import tweepy
 from sklearn.metrics import (
     confusion_matrix,
@@ -495,12 +494,11 @@ def classify_account(username: str, api: tweepy.API) -> str:
     if classifier is None:
         classifier = setup_classifier(debug=True)
     try:
-        fts, user_id = _get_features_and_user_id(username, api, classifier)
+        fts, user_id = _get_features_and_user_id(username, api)
     except tweepy.error.TweepError:
         # Raised if user could not be found by Twitter API connector.
         return map_[-1]
     if fts["is_protected"][user_id] or fts["is_verified"][user_id]:
-        print(termcolor.colored("If Clause", "red"))
         return map_[0]
     class_ = predict(classifier, fts)[0]
     return map_[class_]
