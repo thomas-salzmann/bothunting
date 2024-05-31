@@ -127,7 +127,7 @@ def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
 
 
 def install_dependencies(prj_root: pathlib.Path, platform_: str):
-    if platform_ == "windows":
+    if platform_ == "indows":
         commands = (
             "python -m pip install pipenv --user",
             "pipenv install --dev",
