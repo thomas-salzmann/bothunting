@@ -19,9 +19,4 @@ run
 * On Linux / Mac: `python3 install.py`
 
 The installation script will create a virtual Python environment for you and
-install all Python packages necessary into it. Also, on Linux and Mac, the
-**PATH** environment variable is automatically extended such that project
-internal imports can be resolved by the Python interpreter. On the Windows
-platform, this step has to be carried out manually by the user. In this case,
-the *install.py* script tells the user which value this environment variable
-should get. 
+install all Python packages necessary into it.

@@ -46,84 +46,13 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
 
     lines = (
         "{",
-        '    "python.pythonPath": "' + path_python3 + '",',
-        '    "python.formatting.provider": "black",',
-        '    "python.formatting.blackArgs": [',
-        '        "--line-length",',
-        '        "80",',
-        "    ],",
-        '    "editor.formatOnSave": true,',
-        '    "workbench.editor.enablePreview": false,',
-        '    "files.watcherExclude": {',
-        '        "**' + sep + ".git" + sep + "objects" + sep + '**": true,',
-        '        "**'
-        + sep
-        + ".git"
-        + sep
-        + "subtree-cache"
-        + sep
-        + '**": true,',
-        '        "**' + sep + "node_modules" + sep + "*" + sep + '**": true',
-        "    },",
+        '    "editor.defaultFormatter": "ms-python.autopep8",'
+        '    "editor.formatOnSave": true,'
         "}",
     )
 
     path_vscode_file = vscode_dir / "settings.json"
     fileutil.writelines(path_vscode_file, lines, append_newlines=True)
-
-
-def set_environment_variables(prj_root: pathlib.Path, platform_: str) -> None:
-    if platform_ == "linux":
-        # Update ~/.bashrc file.
-        home_dir = definitions.get_home_directory()
-        osutil.setenv(
-            "PATH",
-            str(home_dir / ".local" / "bin") + ":" + osutil.getenv("PATH"),
-        )
-
-        bashrc_path = home_dir / ".bashrc"
-        bashrc_lines = fileutil.readlines(bashrc_path, rstrip=True)
-        first_install = True
-        if "### Bothunting definitions" in bashrc_lines:
-            first_install = False
-
-        if first_install:
-            # Append definition of environment variables to ~/.bashrc
-            bashrc_lines.append("\n### Bothunting definitions")
-            bashrc_lines.append("export BOTHUNTING_PRJ_ROOT=" + str(prj_root))
-            bashrc_lines.append(
-                "export PYTHONPATH=$PYTHONPATH" + ":" + str(prj_root)
-            )
-        fileutil.writelines(bashrc_path, bashrc_lines, append_newlines=True)
-    elif platform_ == "windows":
-        proc = subprocess.Popen(
-            "python -m site --user-site".split(), stdout=subprocess.PIPE
-        )
-        output, _ = proc.communicate()
-        python_user_site_pkg = pathlib.Path(output.decode("utf-8").strip())
-        python_user_scripts_dir = (
-            pathutil.parent(python_user_site_pkg) / "Scripts"
-        )
-
-        print(
-            "Before proceeding, please extend the following environment variables by the mentioned values:\n"
-        )
-
-        path_env_var = osutil.getenv("PATH")
-        osutil.setenv("PATH", str(python_user_scripts_dir) +
-                      ";" + path_env_var)
-
-        print("PATH: " + str(python_user_scripts_dir))
-        print("BOTHUNTING_PRJ_ROOT: " + str(prj_root))
-        print("PYTHONPATH: " + str(prj_root))
-
-        while True:
-            answer = input("Have you set the environment variables ? [Y/N]")
-
-            if answer == "Y":
-                break
-            else:
-                print("Please set the environment variables before proceeding.")
 
 
 def install_dependencies(prj_root: pathlib.Path, platform_: str):
@@ -150,7 +79,6 @@ def run(
 ):
     prj_root = pathutil.str_to_path(prj_root)
 
-    set_environment_variables(prj_root, platform_)
     install_dependencies(prj_root, platform_)
     gen_vscode_settings(prj_root, platform_)
 
