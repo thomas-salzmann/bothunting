@@ -46,8 +46,8 @@ def gen_vscode_settings(prj_root: pathlib.Path, platform_):
 
     lines = (
         "{",
-        '    "editor.defaultFormatter": "ms-python.autopep8",'
-        '    "editor.formatOnSave": true,'
+        '    "editor.defaultFormatter": "ms-python.autopep8",',
+        '    "editor.formatOnSave": true,',
         "}",
     )
 
