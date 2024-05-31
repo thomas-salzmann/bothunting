@@ -81,7 +81,7 @@ def get_all_tweets(user_id, api):
                 all_tweets.extend(new_tweets)
                 oldest = all_tweets[-1].id - 1
         return all_tweets
-    except tweepy.error.TweepError:
+    except tweepy.errors.TweepyException:
         return None
 
 
@@ -444,7 +444,7 @@ def setup_classifier(
 
 
 def _get_features_and_user_id(
-    username: str, api: tweepy.API, classifier
+    username: str, api: tweepy.API
 ) -> pd.DataFrame:
     feature_dir = definitions.get_out_dir() / "features"
     if not pathutil.is_dir(feature_dir):
@@ -495,7 +495,7 @@ def classify_account(username: str, api: tweepy.API) -> str:
         classifier = setup_classifier(debug=True)
     try:
         fts, user_id = _get_features_and_user_id(username, api)
-    except tweepy.error.TweepError:
+    except tweepy.errors.TweepyException:
         # Raised if user could not be found by Twitter API connector.
         return map_[-1]
     if fts["is_protected"][user_id] or fts["is_verified"][user_id]:
